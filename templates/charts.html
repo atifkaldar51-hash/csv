@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Charts | CSV Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-title">Chart Studio</h1>
+    <p class="page-subtitle">
+      <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+      <strong>{{ file_name }}</strong>
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">
+      <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- Chart builders -->
+<div class="row g-4 mb-5">
+  <!-- Bar -->
+  <div class="col-lg-4">
+    <div class="glass-card chart-builder h-100">
+      <div class="builder-head">
+        <div class="builder-icon blue"><i class="bi bi-bar-chart-fill"></i></div>
+        <div>
+          <h4>Bar Chart</h4>
+          <p>Compare a numeric value across categories.</p>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">X column (category)</label>
+        <select id="barX" class="form-select">
+          {% for c in all_cols %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Y column (numeric)</label>
+        <select id="barY" class="form-select">
+          {% for c in numeric_cols %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          {% if not numeric_cols %}<option value="" disabled>No numeric columns</option>{% endif %}
+        </select>
+      </div>
+      <button class="btn btn-accent w-100" id="genBarBtn">
+        <i class="bi bi-magic me-2"></i>Generate Bar Chart
+      </button>
+    </div>
+  </div>
+
+  <!-- Line -->
+  <div class="col-lg-4">
+    <div class="glass-card chart-builder h-100">
+      <div class="builder-head">
+        <div class="builder-icon green"><i class="bi bi-graph-up"></i></div>
+        <div>
+          <h4>Line Chart</h4>
+          <p>Track a numeric value across an ordered axis.</p>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">X column</label>
+        <select id="lineX" class="form-select">
+          {% for c in all_cols %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Y column (numeric)</label>
+        <select id="lineY" class="form-select">
+          {% for c in numeric_cols %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          {% if not numeric_cols %}<option value="" disabled>No numeric columns</option>{% endif %}
+        </select>
+      </div>
+      <button class="btn btn-accent w-100" id="genLineBtn">
+        <i class="bi bi-magic me-2"></i>Generate Line Chart
+      </button>
+    </div>
+  </div>
+
+  <!-- Pie -->
+  <div class="col-lg-4">
+    <div class="glass-card chart-builder h-100">
+      <div class="builder-head">
+        <div class="builder-icon orange"><i class="bi bi-pie-chart-fill"></i></div>
+        <div>
+          <h4>Pie Chart</h4>
+          <p>Visualise a category's distribution as proportions.</p>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Category column</label>
+        <select id="pieCat" class="form-select">
+          {% for c in all_cols %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <div class="hint-box">
+          <i class="bi bi-lightbulb me-2"></i>
+          The pie automatically groups smaller categories into "Other" for clarity.
+        </div>
+      </div>
+      <button class="btn btn-accent w-100" id="genPieBtn">
+        <i class="bi bi-magic me-2"></i>Generate Pie Chart
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Latest chart preview -->
+<section class="mb-5">
+  <div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0"><i class="bi bi-image me-2 text-accent"></i>Latest Chart</h3>
+      <a id="latestDownload" href="#" class="btn btn-ghost btn-sm d-none">
+        <i class="bi bi-download me-2"></i>Download PNG
+      </a>
+    </div>
+    <div id="latestChart" class="latest-chart-wrap">
+      <div class="empty-state" id="latestEmpty">
+        <i class="bi bi-bar-chart-line"></i>
+        <p>Generate a chart above and it will appear here.</p>
+      </div>
+      <img id="latestImg" src="" alt="Generated chart" class="d-none" />
+      <div id="latestLoading" class="d-none">
+        <div class="spinner-border text-accent" role="status"></div>
+        <p class="mt-2">Rendering chart...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery of previously generated charts -->
+<section id="gallerySection">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="section-title mb-0"><i class="bi bi-collection me-2 text-accent"></i>Chart Gallery</h3>
+    <span id="galleryCount" class="badge bg-light text-dark">{{ generated|length }} chart(s)</span>
+  </div>
+
+  <div id="galleryGrid">
+    {% if generated %}
+      <div class="row g-4">
+        {% for chart in generated %}
+          <div class="col-md-6 col-lg-4">
+            <div class="glass-card chart-card h-100">
+              <div class="chart-thumb">
+                <img src="{{ chart.url }}" alt="{{ chart.name }}" />
+              </div>
+              <div class="chart-meta">
+                <div>
+                  <div class="chart-name">{{ chart.name }}</div>
+                  <div class="chart-info">{{ chart.created }} · {{ chart.size_kb }} KB</div>
+                </div>
+                <a href="{{ url_for('download_chart', filename=chart.name) }}"
+                   class="btn btn-sm btn-accent" title="Download">
+                  <i class="bi bi-download"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="glass-card empty-state-card">
+        <i class="bi bi-images"></i>
+        <h5>No charts yet</h5>
+        <p>Use the builders above to generate your first chart. It will appear here automatically.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AppCSV.initChartBuilders({
+      barBtn: 'genBarBtn',  barX: 'barX',  barY: 'barY',  endpoint: '{{ url_for("api_chart_bar") }}',
+      lineBtn: 'genLineBtn', lineX: 'lineX', lineY: 'lineY', lineEndpoint: '{{ url_for("api_chart_line") }}',
+      pieBtn: 'genPieBtn',  pieCat: 'pieCat', pieEndpoint: '{{ url_for("api_chart_pie") }}'
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Error {{ code }} | CSV Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="error-page text-center py-5">
+  <div class="glass-card error-card mx-auto">
+    <div class="error-code">{{ code }}</div>
+    <h2 class="error-title">Oops!</h2>
+    <p class="error-message">{{ message }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-accent mt-3">
+      <i class="bi bi-house-door me-2"></i>Back to Home
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Home | CSV Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero text-center">
+  <div class="glass-card hero-card mx-auto">
+    <div class="hero-badge">
+      <i class="bi bi-stars"></i> Modern CSV Analytics, Reimagined
+    </div>
+    <h1 class="hero-title">
+      Upload. Analyse. <span class="accent">Visualise.</span>
+    </h1>
+    <p class="hero-subtitle">
+      Drop a CSV and instantly preview rows, explore dataset statistics, and
+      generate beautiful Bar, Line, and Pie charts — all in a clean, Apple-inspired interface.
+    </p>
+
+    {% if current_file %}
+      <div class="current-file-pill">
+        <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+        Currently loaded: <strong>{{ current_file }}</strong>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-accent ms-2">View Dashboard</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Upload zone -->
+<section class="upload-section my-5">
+  <div class="glass-card upload-card mx-auto">
+    <div id="dropZone" class="dropzone">
+      <input type="file" id="csvInput" name="csv_file" accept=".csv" hidden />
+      <div class="dropzone-content">
+        <div class="dropzone-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+        <h3 class="dropzone-title">Drag &amp; drop your CSV file here</h3>
+        <p class="dropzone-sub">or click to browse from your computer</p>
+        <button type="button" class="btn btn-accent" id="browseBtn">
+          <i class="bi bi-folder2-open me-2"></i>Choose CSV File
+        </button>
+        <p class="dropzone-hint">Only <code>.csv</code> files · supports millions of rows</p>
+      </div>
+    </div>
+
+    <!-- Progress / status -->
+    <div id="uploadStatus" class="upload-status d-none">
+      <div class="spinner-border spinner-border-sm text-accent me-2" role="status"></div>
+      <span class="status-text">Uploading &amp; validating...</span>
+    </div>
+  </div>
+</section>
+
+<!-- Sample data -->
+<section class="samples-section my-5">
+  <div class="text-center mb-4">
+    <h2 class="section-title">No CSV handy? Try a sample</h2>
+    <p class="section-sub">Load one of the bundled datasets to explore the dashboard in seconds.</p>
+  </div>
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-3 col-sm-6">
+      <a href="{{ url_for('load_sample', name='sales_data') }}" class="sample-card glass-card">
+        <div class="sample-icon blue"><i class="bi bi-bar-chart-line"></i></div>
+        <h5>Sales Data</h5>
+        <p>Monthly sales across 12 months</p>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="{{ url_for('load_sample', name='students_data') }}" class="sample-card glass-card">
+        <div class="sample-icon green"><i class="bi bi-mortarboard"></i></div>
+        <h5>Students Data</h5>
+        <p>Marks of 10 students</p>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="{{ url_for('load_sample', name='employees_data') }}" class="sample-card glass-card">
+        <div class="sample-icon orange"><i class="bi bi-people"></i></div>
+        <h5>Employees Data</h5>
+        <p>Headcount across 8 departments</p>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="{{ url_for('load_sample', name='products_data') }}" class="sample-card glass-card">
+        <div class="sample-icon purple"><i class="bi bi-box-seam"></i></div>
+        <h5>Products Data</h5>
+        <p>Inventory of 8 product lines</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section my-5">
+  <div class="text-center mb-5">
+    <h2 class="section-title">Everything you need for quick CSV insights</h2>
+    <p class="section-sub">A focused toolkit for fast, beautiful data exploration.</p>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+        <h4>Effortless Upload</h4>
+        <p>Drag &amp; drop or browse to upload CSV files up to 16 MB. Validation happens instantly.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-table"></i></div>
+        <h4>Live Data Preview</h4>
+        <p>See the first 10 rows, column names, and data types the moment your file is parsed.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-clipboard-data"></i></div>
+        <h4>Smart Statistics</h4>
+        <p>Get row/column counts, missing values, and descriptive stats automatically computed.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-bar-chart"></i></div>
+        <h4>Bar &amp; Line Charts</h4>
+        <p>Pick an X and Y column to instantly render a polished Bar or Line chart with Matplotlib.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-pie-chart"></i></div>
+        <h4>Pie Distributions</h4>
+        <p>Visualise category distributions as a clean donut chart with the top slices highlighted.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card glass-card h-100">
+        <div class="feature-icon"><i class="bi bi-download"></i></div>
+        <h4>One-click Download</h4>
+        <p>Every generated chart can be downloaded as a high-resolution PNG with a single click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how-section my-5">
+  <div class="glass-card how-card">
+    <h3 class="section-title text-center mb-4">How it works</h3>
+    <div class="row g-3 text-center">
+      <div class="col-md-3">
+        <div class="step">1</div>
+        <h6>Upload CSV</h6>
+        <p class="muted">Drop a file or pick a sample.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step">2</div>
+        <h6>Preview Data</h6>
+        <p class="muted">First 10 rows + data types.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step">3</div>
+        <h6>Explore Stats</h6>
+        <p class="muted">Missing values, numeric vs categorical.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="step">4</div>
+        <h6>Generate Charts</h6>
+        <p class="muted">Bar · Line · Pie, then download.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Initialise drag & drop on the home page
+  document.addEventListener('DOMContentLoaded', () => {
+    AppCSV.initDropZone({
+      inputId: 'csvInput',
+      dropZoneId: 'dropZone',
+      browseBtnId: 'browseBtn',
+      statusId: 'uploadStatus',
+      endpoint: '{{ url_for("api_upload") }}'
+    });
+  });
+</script>
+{% endblock %}

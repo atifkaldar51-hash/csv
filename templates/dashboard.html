@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | CSV Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-title">Dataset Dashboard</h1>
+    <p class="page-subtitle">
+      <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+      <strong>{{ file_name }}</strong>
+      {% if summary.file_size_mb is defined %}
+        <span class="badge bg-light text-dark ms-2">
+          <i class="bi bi-hdd me-1"></i>{{ summary.file_size_mb }} MB
+        </span>
+      {% endif %}
+      {% if summary.large_file %}
+        <span class="badge bg-info text-dark ms-2" title="Processed via chunked streaming reads">
+          <i class="bi bi-lightning-charge me-1"></i>Large file (streamed)
+        </span>
+      {% endif %}
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('charts') }}" class="btn btn-accent">
+      <i class="bi bi-bar-chart-line me-2"></i>Generate Charts
+    </a>
+  </div>
+</div>
+
+<!-- Summary cards -->
+<section class="summary-grid mb-5">
+  <div class="glass-card summary-card">
+    <div class="summary-icon blue"><i class="bi bi-list-ol"></i></div>
+    <div class="summary-value">{{ summary.file_rows }}</div>
+    <div class="summary-label">Total Rows</div>
+  </div>
+  <div class="glass-card summary-card">
+    <div class="summary-icon green"><i class="bi bi-layout-three-columns"></i></div>
+    <div class="summary-value">{{ summary.file_columns }}</div>
+    <div class="summary-label">Total Columns</div>
+  </div>
+  <div class="glass-card summary-card">
+    <div class="summary-icon orange"><i class="bi bi-exclamation-triangle"></i></div>
+    <div class="summary-value">{{ summary.total_missing }}</div>
+    <div class="summary-label">Missing Values</div>
+  </div>
+  <div class="glass-card summary-card">
+    <div class="summary-icon purple"><i class="bi bi-hash"></i></div>
+    <div class="summary-value">{{ summary.numeric_count }}</div>
+    <div class="summary-label">Numeric Columns</div>
+  </div>
+  <div class="glass-card summary-card">
+    <div class="summary-icon pink"><i class="bi bi-type"></i></div>
+    <div class="summary-value">{{ summary.categorical_count }}</div>
+    <div class="summary-label">Categorical Columns</div>
+  </div>
+  <div class="glass-card summary-card">
+    <div class="summary-icon teal"><i class="bi bi-memory"></i></div>
+    <div class="summary-value">{{ summary.memory_kb }} <span class="unit">KB</span></div>
+    <div class="summary-label">Memory Usage</div>
+  </div>
+</section>
+
+<!-- Preview -->
+<section class="mb-5">
+  <div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0">
+        <i class="bi bi-table me-2 text-accent"></i>Data Preview
+      </h3>
+      <span class="badge bg-light text-dark">
+        Showing {{ preview.shown_rows }} of {{ preview.total_rows }} rows
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table apple-table align-middle">
+        <thead>
+          <tr>
+            <th class="row-idx">#</th>
+            {% for col in preview.columns %}
+              <th>{{ col }}<span class="dtype">{{ preview.dtypes[col] }}</span></th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in preview.rows %}
+            <tr>
+              <td class="row-idx">{{ loop.index }}</td>
+              {% for col in preview.columns %}
+                <td>{{ row[col] if row[col] is not none else '<span class="null">—</span>' | safe }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Columns overview -->
+<section class="row g-4 mb-5">
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <h3 class="section-title"><i class="bi bi-list-columns me-2 text-accent"></i>Columns</h3>
+      <div class="column-list">
+        {% for col in summary.column_names %}
+          <div class="column-chip">
+            <span class="col-name">{{ col }}</span>
+            <span class="col-type">{{ summary.dtypes[col] }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <h3 class="section-title">
+        <i class="bi bi-exclamation-octagon me-2 text-accent"></i>Missing Values Report
+      </h3>
+      {% if summary.missing_report %}
+        <div class="missing-list">
+          {% for item in summary.missing_report %}
+            <div class="missing-row">
+              <span class="missing-col">{{ item.column }}</span>
+              <div class="missing-bar">
+                <div class="missing-fill"
+                     style="width: {{ (item.missing / summary.file_rows * 100) | round(1) }}%"></div>
+              </div>
+              <span class="missing-count">{{ item.missing }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-check-circle"></i>
+          <p>No missing values detected. Clean dataset!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Descriptive stats -->
+{% if summary.numeric_stats %}
+<section class="mb-5">
+  <div class="glass-card p-4">
+    <h3 class="section-title mb-3">
+      <i class="bi bi-calculator me-2 text-accent"></i>Descriptive Statistics (numeric)
+      {% if summary.large_file %}
+        <span class="badge bg-light text-dark ms-2 fs-6" title="Quartiles are not computed for large files to keep memory bounded">
+          <i class="bi bi-info-circle me-1"></i>Quartiles skipped (large file)
+        </span>
+      {% endif %}
+    </h3>
+    <div class="table-responsive">
+      <table class="table apple-table align-middle">
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Count</th>
+            <th>Mean</th>
+            <th>Std</th>
+            <th>Min</th>
+            <th>25%</th>
+            <th>50%</th>
+            <th>75%</th>
+            <th>Max</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for col, stats in summary.numeric_stats.items() %}
+            <tr>
+              <td><strong>{{ col }}</strong></td>
+              <td>{{ stats.count }}</td>
+              <td>{{ stats.mean|round(2) if stats.mean is not none else '—' }}</td>
+              <td>{{ stats.std|round(2) if stats.std is not none else '—' }}</td>
+              <td>{{ stats.min|round(2) if stats.min is not none else '—' }}</td>
+              <td>{{ stats['25%']|round(2) if stats['25%'] is not none else '—' }}</td>
+              <td>{{ stats['50%']|round(2) if stats['50%'] is not none else '—' }}</td>
+              <td>{{ stats['75%']|round(2) if stats['75%'] is not none else '—' }}</td>
+              <td>{{ stats.max|round(2) if stats.max is not none else '—' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Categorical stats -->
+{% if summary.categorical_stats %}
+<section class="mb-5">
+  <div class="glass-card p-4">
+    <h3 class="section-title mb-3">
+      <i class="bi bi-card-list me-2 text-accent"></i>Categorical Distributions (top 5)
+    </h3>
+    <div class="row g-3">
+      {% for col, items in summary.categorical_stats.items() %}
+        <div class="col-md-6">
+          <div class="cat-block">
+            <h6 class="cat-title">{{ col }}</h6>
+            {% if items %}
+              {% for it in items %}
+                <div class="cat-row">
+                  <span class="cat-val">{{ it.value }}</span>
+                  <span class="cat-count">{{ it.count }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="muted small">No values available.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}About | CSV Analytics Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="page-header text-center mb-5">
+  <h1 class="page-title">About</h1>
+  <p class="page-subtitle">A clean, modern toolkit for instant CSV insights.</p>
+</div>
+
+<section class="glass-card p-5 mb-4">
+  <h3 class="section-title"><i class="bi bi-info-circle me-2 text-accent"></i>Project Overview</h3>
+  <p>
+    <strong>CSV Analytics Dashboard</strong> is a lightweight yet powerful web application
+    that lets you upload any CSV file and immediately understand its shape, quality, and
+    story. Whether you are exploring a fresh export from your CRM or sanity-checking a
+    dataset before feeding it into a machine-learning pipeline, the dashboard gives you
+    a clean preview, automatic statistics, and one-click Bar / Line / Pie charts — all
+    wrapped in an Apple-inspired, glassmorphism-flavoured interface.
+  </p>
+  <p>
+    The project emphasises clarity over complexity: a single Flask backend, Pandas for
+    data wrangling, Matplotlib for rendering, and Bootstrap 5 plus a small custom
+    stylesheet for the front-end. No build step, no front-end framework lock-in —
+    just clean, readable code you can extend in any direction.
+  </p>
+</section>
+
+<section class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="glass-card p-4 h-100">
+      <h3 class="section-title"><i class="bi bi-server me-2 text-accent"></i>Backend Stack</h3>
+      <ul class="tech-list">
+        <li><span class="tech-name">Flask</span> — lightweight WSGI web framework for routing &amp; APIs</li>
+        <li><span class="tech-name">Pandas</span> — DataFrame-based data loading, preview &amp; statistics</li>
+        <li><span class="tech-name">NumPy</span> — numeric backbone for descriptive stats</li>
+        <li><span class="tech-name">Matplotlib</span> — server-side chart rendering (Bar / Line / Pie)</li>
+        <li><span class="tech-name">Werkzeug</span> — WSGI utilities and secure file handling</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="glass-card p-4 h-100">
+      <h3 class="section-title"><i class="bi bi-window-stack me-2 text-accent"></i>Frontend Stack</h3>
+      <ul class="tech-list">
+        <li><span class="tech-name">HTML5</span> — semantic, accessible page structure</li>
+        <li><span class="tech-name">CSS3</span> — custom Apple-inspired glassmorphism theme</li>
+        <li><span class="tech-name">JavaScript</span> — drag &amp; drop, AJAX chart generation</li>
+        <li><span class="tech-name">Bootstrap 5</span> — responsive grid &amp; components</li>
+        <li><span class="tech-name">Bootstrap Icons</span> — clean, modern icon set</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="glass-card p-5 mb-4">
+  <h3 class="section-title"><i class="bi bi-stars me-2 text-accent"></i>Key Features</h3>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Drag &amp; drop CSV upload with AJAX validation</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>First-10-rows preview with data types</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Automatic summary cards (rows / columns / missing)</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Numeric vs categorical column classification</div>
+    </div>
+    <div class="col-md-6">
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Descriptive statistics table (count/mean/std/min/max)</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Bar / Line / Pie chart generation with Matplotlib</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Chart gallery with one-click PNG download</div>
+      <div class="feature-bullet"><i class="bi bi-check-circle-fill text-accent"></i>Graceful handling of empty / corrupted / wrong-format files</div>
+    </div>
+  </div>
+</section>
+
+<section class="glass-card p-5 mb-4">
+  <h3 class="section-title"><i class="bi bi-arrow-repeat me-2 text-accent"></i>How the pipeline works</h3>
+  <ol class="pipeline">
+    <li><strong>Upload</strong> — your CSV is saved to <code>static/uploads/</code> with a unique prefix and validated by Pandas.</li>
+    <li><strong>Parse</strong> — <code>utils/csv_handler.py</code> loads the DataFrame and computes the summary &amp; preview.</li>
+    <li><strong>Render dashboard</strong> — the dashboard template displays cards, the preview table, and statistics.</li>
+    <li><strong>Generate charts</strong> — <code>utils/chart_generator.py</code> renders Matplotlib PNGs into <code>static/charts/</code>.</li>
+    <li><strong>Download</strong> — every chart is served as a high-resolution PNG via a dedicated download route.</li>
+  </ol>
+</section>
+
+<section class="glass-card p-5">
+  <h3 class="section-title"><i class="bi bi-rocket-takeoff me-2 text-accent"></i>Roadmap</h3>
+  <ul class="roadmap">
+    <li>Export analytics summary as PDF / Excel</li>
+    <li>Interactive Chart.js previews in addition to Matplotlib PNGs</li>
+    <li>User sessions with persistent upload history</li>
+    <li>Advanced charts: scatter, heatmap, histogram, boxplot</li>
+    <li>API token authentication for programmatic uploads</li>
+    <li>Light / Dark mode toggle</li>
+  </ul>
+</section>
+
+{% endblock %}
